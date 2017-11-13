@@ -30,6 +30,15 @@ def drivers_that_year(year):
     return df[columns]
 
 
+def teams_that_year(year):
+    columns = ['Pos', 'Pts', 'Team']
+    races_url = "https://www.formula1.com/en/results.html/%d/team.html"
+    # using requests only because we want to use https
+    response = requests.get(races_url % year)
+    df = pd.read_html(response.content)[0]
+    return df[columns]
+
+
 if __name__ == "__main__":
     year = int(sys.argv[1])
     assert 1950 <= int(year) <= 2017
@@ -37,3 +46,5 @@ if __name__ == "__main__":
     print(races_that_year(year=year))
     print("Drivers")
     print(drivers_that_year(year=year))
+    print("Teams")
+    print(teams_that_year(year=year))
