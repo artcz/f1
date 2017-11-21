@@ -32,19 +32,35 @@ def races_that_year(year):
 
 def drivers_that_year(year):
     columns = ['Driver', 'Pts', 'Car', 'Nationality']
-    races_url = "https://www.formula1.com/en/results.html/%d/drivers.html"
-    # using requests only because we want to use https
-    response = requests.get(races_url % year)
-    df = pd.read_html(response.content)[0]
+
+    filename = "drivers/%d.html" % year
+
+    if os.path.isfile(filename):
+        content = open(filename).read()
+        print("Using local cache...")
+    else:
+        races_url = "https://www.formula1.com/en/results.html/%d/drivers.html"
+        # using requests only because we want to use https
+        response = requests.get(races_url % year)
+        content = response.content
+
+    df = pd.read_html(content)[0]
     return df[columns]
 
 
 def teams_that_year(year):
     columns = ['Pos', 'Pts', 'Team']
-    races_url = "https://www.formula1.com/en/results.html/%d/team.html"
-    # using requests only because we want to use https
-    response = requests.get(races_url % year)
-    df = pd.read_html(response.content)[0]
+    filename = "team/%d.html" % year
+
+    if os.path.isfile(filename):
+        content = open(filename).read()
+        print("Using local cache...")
+    else:
+        races_url = "https://www.formula1.com/en/results.html/%d/team.html"
+        # using requests only because we want to use https
+        response = requests.get(races_url % year)
+        content = response.content
+    df = pd.read_html(content)[0]
     return df[columns]
 
 
@@ -53,7 +69,7 @@ if __name__ == "__main__":
     assert 1950 <= int(year) <= 2017
     print("Races")
     print(races_that_year(year=year))
-    # print("Drivers")
-    # print(drivers_that_year(year=year))
-    # print("Teams")
-    # print(teams_that_year(year=year))
+    print("Drivers")
+    print(drivers_that_year(year=year))
+    print("Teams")
+    print(teams_that_year(year=year))
