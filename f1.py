@@ -8,16 +8,25 @@ tracks, drivers, etc.
 import pandas as pd
 import requests
 import sys
+import os
 
 pd.set_option('display.width', 2000)
 
 
 def races_that_year(year):
     columns = ['Date', 'Grand Prix', 'Car', 'Winner', 'Time', 'Laps']
-    races_url = "https://www.formula1.com/en/results.html/%d/races.html"
-    # using requests only because we want to use https
-    response = requests.get(races_url % year)
-    df = pd.read_html(response.content)[0]
+    filename = "races/%d.html" % year
+
+    if os.path.isfile(filename):
+        content = open(filename).read()
+        print("Using local cache...")
+    else:
+        races_url = "https://www.formula1.com/en/results.html/%d/races.html"
+        # using requests only because we want to use https
+        response = requests.get(races_url % year)
+        content = response.content
+
+    df = pd.read_html(content)[0]
     return df[columns]
 
 
@@ -44,7 +53,7 @@ if __name__ == "__main__":
     assert 1950 <= int(year) <= 2017
     print("Races")
     print(races_that_year(year=year))
-    print("Drivers")
-    print(drivers_that_year(year=year))
-    print("Teams")
-    print(teams_that_year(year=year))
+    # print("Drivers")
+    # print(drivers_that_year(year=year))
+    # print("Teams")
+    # print(teams_that_year(year=year))
