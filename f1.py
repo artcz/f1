@@ -6,9 +6,10 @@ tracks, drivers, etc.
 """
 
 import pandas as pd
-import requests
 import sys
 import os
+
+from download import download
 
 pd.set_option('display.width', 2000)
 
@@ -21,10 +22,8 @@ def races_that_year(year):
         content = open(filename).read()
         print("Using local cache...")
     else:
-        races_url = "https://www.formula1.com/en/results.html/%d/races.html"
-        # using requests only because we want to use https
-        response = requests.get(races_url % year)
-        content = response.content
+        _, content = download("races", year)
+        print("Using internet...")
 
     df = pd.read_html(content)[0]
     return df[columns]
@@ -39,10 +38,8 @@ def drivers_that_year(year):
         content = open(filename).read()
         print("Using local cache...")
     else:
-        races_url = "https://www.formula1.com/en/results.html/%d/drivers.html"
-        # using requests only because we want to use https
-        response = requests.get(races_url % year)
-        content = response.content
+        _, content = download("drivers", year)
+        print("Using internet...")
 
     df = pd.read_html(content)[0]
     return df[columns]
@@ -56,10 +53,9 @@ def teams_that_year(year):
         content = open(filename).read()
         print("Using local cache...")
     else:
-        races_url = "https://www.formula1.com/en/results.html/%d/team.html"
-        # using requests only because we want to use https
-        response = requests.get(races_url % year)
-        content = response.content
+        _, content = download("team", year)
+        print("Using internet...")
+
     df = pd.read_html(content)[0]
     return df[columns]
 
