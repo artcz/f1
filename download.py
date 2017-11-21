@@ -11,53 +11,36 @@ import time
 import requests
 
 MIN_YEAR, MAX_YEAR = 1950, 2017
+BASE_URL = "https://www.formula1.com/en/results.html/"
 
 
-def download_races(year):
-    races_url = "https://www.formula1.com/en/results.html/%d/races.html"
-    response = requests.get(races_url % year)
+def download(url):
+    full_url = BASE_URL + url
+    response = requests.get(full_url)
     return response.content
 
 
-def store_race(year, content):
-    if not os.path.isdir('races/'):
-        os.makedirs('races/')
-
-    filename = 'races/%d.html' % year
-    with open(filename, 'w') as html_file:
-        html_file.write(content)
-
-    return filename
-
-
-def download_drivers(year):
-    drivers_url = "https://www.formula1.com/en/results.html/%d/drivers.html"
-    response = requests.get(drivers_url % year)
-    return response.content
-
-
-def store_drivers_table(year, content):
-    if not os.path.isdir('drivers/'):
-        os.makedirs('drivers/')
-
-    filename = 'drivers/%d.html' % year
-    with open(filename, 'w') as html_file:
-        html_file.write(content)
-
-    return filename
+def filename(prefix):
+    return "%s/%d.html" % (prefix, year)
 
 
 def download_teams(year):
-    teams_url = "https://www.formula1.com/en/results.html/%d/team.html"
-    response = requests.get(teams_url % year)
-    return response.content
+    return filename("teams"), download("%d/team.html" % year)
 
 
-def store_teams_table(year, content):
-    if not os.path.isdir('teams/'):
-        os.makedirs('teams/')
+def download_races(year):
+    return filename("races"), download("%d/races.html" % year)
 
-    filename = 'teams/%d.html' % year
+
+def download_drivers(year):
+    return filename("drivers"), download("%d/drivers.html" % year)
+
+
+def store(filename, content):
+    directory = os.path.dirname(os.path.realpath(filename))
+    if not os.path.isdir(directory):
+        os.makedirs(directory)
+
     with open(filename, 'w') as html_file:
         html_file.write(content)
 
@@ -66,7 +49,7 @@ def store_teams_table(year, content):
 
 if __name__ == "__main__":
     for year in range(MIN_YEAR, MAX_YEAR + 1):
-        print(store_race(year, download_races(year)))
-        print(store_drivers_table(year, download_drivers(year)))
-        print(store_teams_table(year, download_teams(year)))
+        print(store(*download_races(year)))
+        print(store(*download_drivers(year)))
+        print(store(*download_teams(year)))
         time.sleep(0.5)
