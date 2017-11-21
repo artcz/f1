@@ -9,55 +9,45 @@ import pandas as pd
 import sys
 import os
 
-from download import download
+from download import download, filename
 
 pd.set_option('display.width', 2000)
 
 
-def races_that_year(year):
-    columns = ['Date', 'Grand Prix', 'Car', 'Winner', 'Time', 'Laps']
-    filename = "races/%d.html" % year
+def get_content(type, year):
+    assert type in ["races", "drivers", "team"]
+    _filename = filename(type, year)
 
-    if os.path.isfile(filename):
-        content = open(filename).read()
+    if os.path.isfile(_filename):
+        content = open(_filename).read()
         print("Using local cache...")
     else:
-        _, content = download("races", year)
+        _, content = download(type, year)
         print("Using internet...")
 
-    df = pd.read_html(content)[0]
-    return df[columns]
+    return content
+
+
+def make_df(content, columns):
+    return pd.read_html(content)[0][columns]
+
+
+def races_that_year(year):
+    columns = ['Date', 'Grand Prix', 'Car', 'Winner', 'Time', 'Laps']
+    content = get_content("races", year)
+    return make_df(content, columns)
 
 
 def drivers_that_year(year):
     columns = ['Driver', 'Pts', 'Car', 'Nationality']
-
-    filename = "drivers/%d.html" % year
-
-    if os.path.isfile(filename):
-        content = open(filename).read()
-        print("Using local cache...")
-    else:
-        _, content = download("drivers", year)
-        print("Using internet...")
-
-    df = pd.read_html(content)[0]
-    return df[columns]
+    content = get_content("drivers", year)
+    return make_df(content, columns)
 
 
 def teams_that_year(year):
     columns = ['Pos', 'Pts', 'Team']
-    filename = "team/%d.html" % year
-
-    if os.path.isfile(filename):
-        content = open(filename).read()
-        print("Using local cache...")
-    else:
-        _, content = download("team", year)
-        print("Using internet...")
-
-    df = pd.read_html(content)[0]
-    return df[columns]
+    content = get_content("team", year)
+    return make_df(content, columns)
 
 
 if __name__ == "__main__":
