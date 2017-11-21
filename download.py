@@ -14,26 +14,18 @@ MIN_YEAR, MAX_YEAR = 1950, 2017
 BASE_URL = "https://www.formula1.com/en/results.html/"
 
 
-def download(url):
-    full_url = BASE_URL + url
-    response = requests.get(full_url)
-    return response.content
-
-
-def filename(prefix):
+def filename(prefix, year):
     return "%s/%d.html" % (prefix, year)
 
 
-def download_teams(year):
-    return filename("teams"), download("%d/team.html" % year)
+def url(what, year):
+    return BASE_URL + "%d/%s.html" % (year, what)
 
 
-def download_races(year):
-    return filename("races"), download("%d/races.html" % year)
-
-
-def download_drivers(year):
-    return filename("drivers"), download("%d/drivers.html" % year)
+def download(what, year):
+    assert what in ["team", "races", "drivers"]
+    response = requests.get(url(what, year))
+    return filename(what, year), response.content
 
 
 def store(filename, content):
@@ -49,7 +41,7 @@ def store(filename, content):
 
 if __name__ == "__main__":
     for year in range(MIN_YEAR, MAX_YEAR + 1):
-        print(store(*download_races(year)))
-        print(store(*download_drivers(year)))
-        print(store(*download_teams(year)))
+        print(store(*download("races", year)))
+        print(store(*download("drivers", year)))
+        print(store(*download("team", year)))
         time.sleep(0.5)
